@@ -1,0 +1,25 @@
+# build me with:
+# docker build -f Dockerfile-vllm --tag leapfrogai/vllm:0.1.7 .
+
+# VLLM requires CUDA <12...so we have to use a 22.x series pytorch image. See
+# https://docs.nvidia.com/deeplearning/frameworks/support-matrix/index.html
+# for details
+# this is a python 3.8.10-based image, so the custom leapfrog wheel you build below
+# has to be built with a 3.8.x series python
+FROM nvcr.io/nvidia/pytorch:22.12-py3
+
+# create a non-root user
+RUN useradd -ms /bin/bash user
+
+# uninstall torch version that's in the container (per VLLM docs)
+RUN pip uninstall -y torch
+
+# Install requirements
+COPY --chown=user:user requirements-vllm.txt .
+RUN pip install -r requirements-vllm.txt
+
+# copy in your custom leapfrog build (that supports asyncio) and install over the default one
+COPY --chown=user:user leapfrogai-0.3.2-py3-none-any.whl .
+RUN pip install --force-reinstall leapfrogai-0.3.2-py3-none-any.whl
+
+USER user
