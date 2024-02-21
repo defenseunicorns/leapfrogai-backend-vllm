@@ -8,7 +8,7 @@ DEVICE ?= 0
 .PHONY: all
 
 create-venv:
-	python -m venv .venv
+	uv venv
 
 requirements-dev:
 	uv pip install -r requirements-dev.txt --override overrides.txt
