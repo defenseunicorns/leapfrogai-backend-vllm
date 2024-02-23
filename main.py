@@ -30,7 +30,6 @@ class Model:
     delta_queue_by_id: Dict[str, queue.Queue] = {}
     result_by_id: Dict[str, RequestOutput] = {}
     iterables: AsyncIterator[RequestOutput] = None
-    all_iterators: list = []
 
     def __init__(self):
         logging.getLogger().setLevel(logging.DEBUG)
