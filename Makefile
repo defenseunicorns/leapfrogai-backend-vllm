@@ -25,7 +25,7 @@ build-requirements-dev:
 	uv pip compile pyproject.toml -o requirements-dev.txt --override overrides.txt --extra dev
 
 fetch-model:
-	echo "NotImplementedError"
+	python scripts/model_download.py
 
 test:
 	pytest **/*.py

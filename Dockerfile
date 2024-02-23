@@ -1,26 +1,39 @@
-# before building me, build the vllm base image with
-# docker build -f Dockerfile-vllm --tag leapfrogai/vllm:0.1.7
-# then build me with
-# docker build --tag leapfrogai/mpt-7b-8k-chat .
-FROM leapfrogai/vllm:0.1.4
+ARG ARCH=amd64
 
-WORKDIR app
+# hardened and slim python w/ developer tools image
+FROM ghcr.io/defenseunicorns/leapfrogai/python:3.11-dev-${ARCH} as builder
 
-COPY --chown=user:user mpt-7b-8k-chat mpt-7b-8k-chat
+WORKDIR /leapfrogai
 
-# copy in extra requirements and install
-COPY --chown=user:user requirements.txt .
+# download model
+RUN python -m pip install -U huggingface_hub[cli,hf_transfer]
+ARG REPO_ID=TheBloke/Synthia-7B-v3.0-AWQ
+ARG REVISION=main
+COPY scripts/model_download.py scripts/model_download.py
+RUN REPO_ID=${REPO_ID} FILENAME=${FILENAME} REVISION=${REVISION} python3.11 scripts/model_download.py
+
+# create virtual environment for light-weight portability and minimal libraries
+RUN python -m pip install -U uv
+RUN uv venv
+ENV PATH="/leapfrogai/.venv/bin:$PATH"
+
+COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# copy in local copy of leapfrogai
-COPY --chown=user:user leapfrogai-0.3.4a0-py3-none-any.whl .
-RUN pip install leapfrogai-0.3.4a0-py3-none-any.whl
+# hardened and slim python image
+FROM ghcr.io/defenseunicorns/leapfrogai/python:3.11-${ARCH}
 
-# Move the rest of the python files (most likely place layer cache will be invalidated)
-COPY --chown=user:user *.py .
+ENV PATH="/leapfrogai/.venv/bin:$PATH"
+ENV QUANTIZATION=awq
 
-# Publish port
+WORKDIR /leapfrogai
+
+COPY --from=builder /leapfrogai/.venv/ /leapfrogai/.venv/
+COPY --from=builder /leapfrogai/.model/ /leapfrogai/.model/
+
+COPY main.py .
+COPY config.yaml .
+
 EXPOSE 50051:50051
 
-# Enjoy
-ENTRYPOINT ["python3", "model.py"]
+ENTRYPOINT ["leapfrogai", "--app-dir=.", "main:Model"]

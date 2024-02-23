@@ -3,3 +3,4 @@ Synthia-7B-v1.3
 .vscode/
 config.yaml
 .model
+.env
