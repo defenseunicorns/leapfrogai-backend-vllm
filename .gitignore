@@ -4,3 +4,4 @@ Synthia-7B-v1.3
 config.yaml
 .model
 .env
+.python-version
