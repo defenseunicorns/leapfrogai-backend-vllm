@@ -25,7 +25,7 @@ def clamp(n: float | int, smallest: float | int, largest: float | int):
 
 
 class RandomAsyncIterator:
-    """Randomly selects an iterator and returns the next item"""
+    """Randomly selects an iterator and returns the next element"""
 
     def __init__(self, async_iterables):
         self.async_iterators = [ai.__aiter__() for ai in async_iterables]
@@ -74,6 +74,8 @@ class Model:
 
     def __init__(self):
         logging.getLogger().setLevel(logging.DEBUG)
+
+        # Spawns a thread to manage adding elements to the queue as requests are made
         _thread = threading.Thread(target=asyncio.run, args=(self.iterate_outputs(),))
         _thread.start()
 
@@ -88,8 +90,9 @@ class Model:
                                            worker_use_ray=True)
         self.engine = AsyncLLMEngine.from_engine_args(self.engine_args)
 
-    # Iterate over all the output AsyncIterables which are produced whenever a new request comes in
     async def iterate_outputs(self):
+        """Loop through the collection of iterators and add their elements to the queue, forever"""
+        
         t0_by_id: dict[str, float] = {}
         index_by_id: dict[str, int] = {}
         num_tokens_by_id: dict[str, int] = {}
@@ -129,6 +132,8 @@ class Model:
             time.sleep(0)
 
     async def create_response(self, request_id: str, prompt: str, config: GenerationConfig):
+        """Requests a response for the prompt and adds the resulting iterator to the collection of iterators"""
+
         sampling_params = SamplingParams(temperature=config.temperature,
                                          # Clamp top_p value to prevent float errors
                                          top_p=clamp(config.top_p,
@@ -161,8 +166,11 @@ class Model:
     ) -> Generator[str, Any, Any]:
         request_id = random_uuid()
         self.done_by_id[request_id] = False
+
+        # Spawns a thread to request a response for the prompt
         _thread = threading.Thread(target=asyncio.run, args=(self.generate_session(request_id, prompt, config),))
         _thread.start()
+
         logging.info(f"Begin reading the output for request {request_id}")
 
         while not self.done_by_id.get(request_id) or not self.is_queue_empty(request_id):
