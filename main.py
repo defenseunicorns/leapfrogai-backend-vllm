@@ -25,15 +25,17 @@ def clamp(n: float | int, smallest: float | int, largest: float | int):
 
 
 class RandomAsyncIterator:
-    """Randomly selects an iterator and returns the next element"""
+    """Manages multiple async iterables and allows iterating over them in a random order."""
 
     def __init__(self, async_iterables):
+        # Convert each iterable into an async iterator
         self.async_iterators = [ai.__aiter__() for ai in async_iterables]
 
     def __aiter__(self):
         return self
 
     async def __anext__(self):
+        """Return the next item from a randomly chosen iterator. If all iterators are exhausted, stop iteration."""
         if not self.async_iterators:  # Check if there are no iterators left
             raise StopAsyncIteration
 
@@ -50,15 +52,15 @@ class RandomAsyncIterator:
         raise StopAsyncIteration
 
     def is_empty(self):
-        """Returns the list of iterators is empty."""
+        """Check if there are any iterators left."""
         return len(self.async_iterators) <= 0
 
     def add_iterator(self, async_iterable):
-        """Add an async iterable to the list of iterators."""
+        """Add a new async iterable to the pool of iterators."""
         self.async_iterators.append(async_iterable.__aiter__())
 
     def remove_iterator(self, async_iterable):
-        """Remove an async iterable from the list of iterators if it exists."""
+        """Attempt to remove an async iterable from the pool if it exists."""
         try:
             self.async_iterators.remove(async_iterable.__aiter__())
         except ValueError:
@@ -67,6 +69,8 @@ class RandomAsyncIterator:
 
 @LLM
 class Model:
+    """Implements an LLM model with concurrent output generation and management."""
+
     done_by_id: Dict[str, bool] = {}
     delta_queue_by_id: Dict[str, queue.Queue] = {}
     result_by_id: Dict[str, RequestOutput] = {}
@@ -75,11 +79,11 @@ class Model:
     def __init__(self):
         logging.getLogger().setLevel(logging.DEBUG)
 
-        # Spawns a thread to manage adding elements to the queue as requests are made
+        # Background thread for managing output iteration
         _thread = threading.Thread(target=asyncio.run, args=(self.iterate_outputs(),))
         _thread.start()
 
-        # Load the local config.yaml
+        # Configuration setup for the backend and model
         self.backend_config = BackendConfig()
         self.model = self.backend_config.model.source
         self.engine_args = AsyncEngineArgs(engine_use_ray=True,
@@ -91,8 +95,8 @@ class Model:
         self.engine = AsyncLLMEngine.from_engine_args(self.engine_args)
 
     async def iterate_outputs(self):
-        """Loop through the collection of iterators and add their elements to the queue, forever"""
-        
+        """Continuously processes outputs from the random iterator and manages state by request IDs."""
+
         t0_by_id: dict[str, float] = {}
         index_by_id: dict[str, int] = {}
         num_tokens_by_id: dict[str, int] = {}
@@ -132,7 +136,8 @@ class Model:
             time.sleep(0)
 
     async def create_response(self, request_id: str, prompt: str, config: GenerationConfig):
-        """Requests a response for the prompt and adds the resulting iterator to the collection of iterators"""
+        """Initiate a response generation for the given prompt and configuration, adding the result to the iterator
+        pool."""
 
         sampling_params = SamplingParams(temperature=config.temperature,
                                          # Clamp top_p value to prevent float errors
@@ -152,18 +157,24 @@ class Model:
         self.random_iterator.add_iterator(gen_iter)
 
     async def generate_session(self, session: str, prompt: str, config: GenerationConfig):
+        """Manage a session's lifecycle for generating output, including setting up necessary state and iterators."""
+
         if self.delta_queue_by_id.get(session) is None:
             self.delta_queue_by_id[session] = queue.Queue()
 
         await self.create_response(session, prompt, config)
 
     def is_queue_empty(self, request_id) -> bool:
+        """Check if the queue for a given request ID is empty or non-existent."""
+
         cur_request_queue = self.delta_queue_by_id.get(request_id)
         return cur_request_queue is None or cur_request_queue.empty()
 
     def generate(
             self, prompt: str, config: GenerationConfig
     ) -> Generator[str, Any, Any]:
+        """Initiate and manage the generation process for a given prompt, yielding generated text segments."""
+
         request_id = random_uuid()
         self.done_by_id[request_id] = False
 
