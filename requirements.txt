@@ -10,7 +10,7 @@ annotated-types==0.6.0
 anyio==4.3.0
     # via
     #   starlette
-    #   watchfiles
+    #   watchfilesl
 attrs==23.2.0
     # via
     #   jsonschema
