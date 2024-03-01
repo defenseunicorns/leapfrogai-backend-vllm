@@ -10,6 +10,3 @@ prompt_format:
     system: "SYSTEM: {}\n"
     assistant: "ASSISTANT: {}\n"
     user: "USER: {}\n"
-defaults:
-  top_p: 1.0
-  top_k: 50

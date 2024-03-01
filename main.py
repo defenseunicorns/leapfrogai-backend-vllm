@@ -19,6 +19,7 @@ from vllm.utils import random_uuid
 
 load_dotenv()
 
+
 def clamp(n: float | int, smallest: float | int, largest: float | int):
     return max(smallest, min(n, largest))
 
@@ -87,7 +88,7 @@ class Model:
         self.model = self.backend_config.model.source
         self.engine_args = AsyncEngineArgs(engine_use_ray=True,
                                            model=self.model,
-                                           trust_remote_code=True,
+                                           trust_remote_code=False,
                                            quantization=os.environ["QUANTIZATION"] or None,
                                            max_context_len_to_capture=self.backend_config.max_context_length,
                                            worker_use_ray=True)
@@ -140,10 +141,10 @@ class Model:
 
         sampling_params = SamplingParams(temperature=config.temperature,
                                          # Clamp top_p value to prevent float errors
-                                         top_p=clamp(self.backend_config.defaults.top_p,
+                                         top_p=clamp(config.top_p,
                                                      0.0 + sys.float_info.epsilon, 1.0),
                                          # Restrict top_k to valid values, -1 disables top_k
-                                         top_k=self.backend_config.defaults.top_k if self.backend_config.defaults.top_k >= 1 else -1,
+                                         top_k=config.top_k if config.top_k >= 1 else -1,
                                          stop=self.backend_config.stop_tokens,
                                          max_tokens=config.max_new_tokens,
                                          skip_special_tokens=False
