@@ -1,0 +1,12 @@
+model:
+  source: ".model/"
+max_context_length: 16384
+stop_tokens:
+  - "<|im_end|>"
+  - "<|endoftext|>"
+  - "</s>"
+prompt_format:
+  chat:
+    system: "SYSTEM: {}\n"
+    assistant: "ASSISTANT: {}\n"
+    user: "USER: {}\n"

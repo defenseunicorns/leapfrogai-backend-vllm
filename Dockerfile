@@ -1,26 +1,53 @@
-# before building me, build the vllm base image with
-# docker build -f Dockerfile-vllm --tag leapfrogai/vllm:0.1.7
-# then build me with
-# docker build --tag leapfrogai/mpt-7b-8k-chat .
-FROM leapfrogai/vllm:0.1.4
+ARG ARCH=amd64
 
-WORKDIR app
+FROM nvidia/cuda:12.2.2-devel-ubuntu22.04 as builder
 
-COPY --chown=user:user mpt-7b-8k-chat mpt-7b-8k-chat
+ENV DEBIAN_FRONTEND=noninteractive
 
-# copy in extra requirements and install
-COPY --chown=user:user requirements.txt .
-RUN pip install -r requirements.txt
+USER root
 
-# copy in local copy of leapfrogai
-COPY --chown=user:user leapfrogai-0.3.4a0-py3-none-any.whl .
-RUN pip install leapfrogai-0.3.4a0-py3-none-any.whl
+RUN groupadd -g 65532 vglusers && \
+    useradd -ms /bin/bash nonroot -u 65532 -g 65532 && \
+    usermod -a -G video,sudo nonroot
 
-# Move the rest of the python files (most likely place layer cache will be invalidated)
-COPY --chown=user:user *.py .
+WORKDIR /home/leapfrogai
 
-# Publish port
+# grab necesary python dependencies
+RUN apt-get -y update \
+    && apt-get install -y software-properties-common \
+    && apt-get -y update \
+    && add-apt-repository universe \
+    && add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get -y update
+
+# get deps for vllm compilation and model download
+RUN apt-get -y install python3.11-full git python3-venv
+
+RUN chown -R nonroot /home/leapfrogai/
+USER nonroot
+
+RUN python3 -m venv .venv
+ENV PATH="/home/leapfrogai/.venv/bin:$PATH"
+# create virtual environment for light-weight portability and minimal libraries
+RUN python3 -m pip install -U uv
+COPY requirements.txt .
+COPY overrides.txt .
+RUN uv pip install -r requirements.txt --override overrides.txt
+RUN uv pip install -U huggingface_hub[cli,hf_transfer]
+
+# download model
+ARG REPO_ID=TheBloke/Synthia-7B-v2.0-AWQ
+ARG REVISION=main
+ENV HF_HOME=/home/leapfrogai/.cache/huggingface
+COPY scripts/model_download.py scripts/model_download.py
+
+RUN REPO_ID=${REPO_ID} FILENAME=${FILENAME} REVISION=${REVISION} python3 scripts/model_download.py
+
+ENV QUANTIZATION=awq
+
+COPY main.py .
+COPY config.yaml .
+
 EXPOSE 50051:50051
 
-# Enjoy
-ENTRYPOINT ["python3", "model.py"]
+ENTRYPOINT ["leapfrogai", "--app-dir=.", "main:Model"]
