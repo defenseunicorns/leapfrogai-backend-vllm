@@ -8,16 +8,20 @@ DEVICE ?= 0
 .PHONY: all
 
 create-venv:
+	pip install uv
 	uv venv
 
 requirements-dev:
+	pip install uv
 	uv pip install -r requirements-dev.txt --override overrides.txt
 
 requirements:
+	pip install uv
 	uv pip sync requirements.txt
 	uv pip sync requirements-dev.txt
 
 build-requirements:
+	pip install uv
 	uv pip compile pyproject.toml -o requirements.txt --override overrides.txt --generate-hashes
 
 build-requirements-dev:
@@ -38,9 +42,33 @@ lint:
 	ruff format .
 
 docker-build:
+	if [ -f .env ]; then \
+		echo "env file exists"; \
+	else \
+		echo "env file does not exist, using .env.example."; \
+		cp .env.example .env; \
+	fi
+	if [ -f config.yaml ]; then \
+		echo "config file exists"; \
+	else \
+		echo "config file does not exist, using config.example.yaml."; \
+		cp config.example.yaml config.yaml; \
+	fi
 	docker build -t ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION} .
 
 docker-build-local-registry:
+	if [ -f .env ]; then \
+		echo "env file exists"; \
+	else \
+		echo "env file does not exist, using .env.example."; \
+		cp .env.example .env; \
+	fi
+	if [ -f config.yaml ]; then \
+		echo "config file exists"; \
+	else \
+		echo "config file does not exist, using config.example.yaml."; \
+		cp config.example.yaml config.yaml; \
+	fi
 	docker build -t ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION} .
 	docker tag ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION} localhost:5000/defenseunicorns/leapfrogai/vllm:${VERSION}
 	docker push localhost:5000/defenseunicorns/leapfrogai/vllm:${VERSION}
