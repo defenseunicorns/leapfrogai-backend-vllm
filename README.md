@@ -46,6 +46,9 @@ make fetch-model
 # Copy the environment variable file, change this if different params are needed
 cp .env.example .env
 
+# Copy the config file, change this if different params are needed
+cp config.example.yaml config.yaml
+
 # Start Model Backend
 make dev
 ```
