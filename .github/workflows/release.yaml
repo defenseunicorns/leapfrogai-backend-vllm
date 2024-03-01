@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish:
+  docker-publish:
     runs-on: ai-ubuntu-big-boy-4-core
     steps:
       - name: Checkout Repo
@@ -28,6 +28,15 @@ jobs:
       - name: Build images
         run: |
           make docker-build docker-push VERSION=${{ steps.get_version.outputs.version-without-v }}
+
+  zarf-publish:
+    runs-on: ai-ubuntu-big-boy-4-core
+    needs: docker-publish
+    steps:
+
+      - name: Version
+        id: get_version
+        uses: battila7/get-version-action@v2
 
       - name: Install Zarf
         uses: defenseunicorns/setup-zarf@f95763914e20e493bb5d45d63e30e17138f981d6 # v1.0.0
