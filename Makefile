@@ -74,7 +74,7 @@ docker-build-local-registry:
 	docker push localhost:5000/defenseunicorns/leapfrogai/vllm:${VERSION}
 
 docker-run:
-	docker run -it ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION}
+	docker run -it --gpus device=0 -p 50051:50051 ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION}
 
 docker-push:
 	docker push ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION}
