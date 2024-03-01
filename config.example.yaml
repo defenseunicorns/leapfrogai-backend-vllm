@@ -2,6 +2,8 @@ model:
   source: ".model/"
 max_context_length: 16384
 stop_tokens:
+  - "<|im_end|>"
+  - "<|endoftext|>"
   - "</s>"
 prompt_format:
   chat:
@@ -10,4 +12,4 @@ prompt_format:
     user: "USER: {}\n"
 defaults:
   top_p: 1.0
-  top_k: 0
+  top_k: 50
