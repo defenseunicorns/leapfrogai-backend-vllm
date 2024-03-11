@@ -14,7 +14,7 @@ constants:
 variables:
   - name: QUANTIZATION
     description: "The quantization method used to reduce the model size/quality, or none."
-    default: "awq"
+    default: "gptq"
     prompt: true
   - name: TENSOR_PARALLEL_SIZE
     description: "The number of GPUs to load and inference the model across."
