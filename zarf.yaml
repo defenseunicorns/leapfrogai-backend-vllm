@@ -11,6 +11,16 @@ constants:
   - name: NAME
     value: "###ZARF_PKG_TMPL_NAME###"
 
+variables:
+  - name: QUANTIZATION
+    description: "The quantization method used to reduce the model size/quality, or none."
+    default: "awq"
+    prompt: true
+  - name: TENSOR_PARALLEL_SIZE
+    description: "The number of GPUs to load and inference the model across."
+    value: 1
+    prompt: true
+
 components:
   - name: import-model
     required: true

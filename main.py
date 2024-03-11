@@ -91,7 +91,8 @@ class Model:
                                            trust_remote_code=False,
                                            quantization=os.environ["QUANTIZATION"] or None,
                                            max_context_len_to_capture=self.backend_config.max_context_length,
-                                           worker_use_ray=True)
+                                           worker_use_ray=True,
+                                           tensor_parallel_size=os.environ["TENSOR_PARALLEL_SIZE"] or 1)
         self.engine = AsyncLLMEngine.from_engine_args(self.engine_args)
 
     async def iterate_outputs(self):

@@ -73,6 +73,7 @@ Where `<IMAGE_TAG>` is the released packages found [here](https://github.com/org
 
 ```bash
 docker build -t ghcr.io/defenseunicorns/leapfrogai/vllm:<IMAGE_TAG> .
+# device=0 means it will use the first slotted GPU
 docker run --gpus device=0 -e GPU_ENABLED=true -p 50051:50051 -d --name vllm ghcr.io/defenseunicorns/leapfrogai/vllm:<IMAGE_TAG>
 ```
 
