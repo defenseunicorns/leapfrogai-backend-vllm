@@ -102,7 +102,7 @@ export model_repo_id="TheBloke/Synthia-7B-v2.0-AWQ"
 export model_revision="main"
 export repository=localhost:5000/defenseunicorns/leapfrogai/$model_name
 
-docker build --build-arg REPO_ID=$model_repo_id --build-arg REVISION=$revision -t $repository:$version
+docker build --build-arg REPO_ID=$model_repo_id --build-arg REVISION=$model_revision -t $repository:$version .
 
 # Create Zarf package
 # See Zarf documentation for more details
@@ -115,9 +115,6 @@ zarf package create \
 # Deploy the target Zarf package 
 #   Change the resource limits as required by the model size
 zarf package deploy \
-    --set name=$model_name \
-    --set image_repository=$repository\
-    --set image_version=$version \
     --set GPU_ENABLED=true \
     --set LIMITS_GPU=1 \
     --set REQUESTS_GPU=1 \
@@ -125,5 +122,5 @@ zarf package deploy \
     --set REQUESTS_CPU=6 \
     --set LIMITS_MEMORY="100Gi" \
     --set REQUESTS_MEMORY="50Gi" \
-    zarf-*.tar.zst && \
+    zarf-*.tar.zst
 ```
