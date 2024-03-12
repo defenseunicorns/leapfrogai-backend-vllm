@@ -22,7 +22,7 @@ The following are additional assumptions for GPU inferencing:
 
 ### Model Selection
 
-The default model that comes with this backend in this repository's officially released images is a [4-bit quantization of the Synthia-7b model](https://huggingface.co/TheBloke/SynthIA-7B-v2.0-AWQ).
+The default model that comes with this backend in this repository's officially released images is an [AWQ quantization of the Synthia-7b model](https://huggingface.co/TheBloke/SynthIA-7B-v2.0-AWQ).
 
 Other models can be loaded into this backend by modifying or supplying the [model_download.py](./scripts/model_download.py) arguments during image creation or Makefile command execution. The arguments must point to a single quantized model file, else you will need to use the [autoawq](https://docs.vllm.ai/en/latest/quantization/auto_awq.html) converter on an un-quantized model. Please see the Dockerfile or Makefile for further details.
 
@@ -88,7 +88,7 @@ zarf package create --set IMAGE_REPOSITORY=ghcr.io/defenseunicorns/leapfrogai/vl
 zarf package publish zarf-package-vllm-amd64-<IMAGE_TAG>.tar.zst oci://ghcr.io/defenseunicorns/packages/leapfrogai
 ```
 
-### Changing Model Name
+### Package Naming for Production Deployment
 
 To change the name of the model's Zarf package and Docker image being produced for installation into a cluster and exposure to the end user, do the following:
 
