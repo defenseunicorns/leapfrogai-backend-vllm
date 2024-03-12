@@ -98,8 +98,8 @@ To change the name of the model's Zarf package and Docker image being produced f
 #   see Docker documentation for more details
 export model_name="synthia-7b-awq" # name of the final package and image (no longer than 63 characters)
 export version="0.0.1" # desired image and package version
-export model_repo_id=""
-export model_revision=""
+export model_repo_id="TheBloke/Synthia-7B-v2.0-AWQ"
+export model_revision="main"
 export repository=localhost:5000/defenseunicorns/leapfrogai/$model_name
 
 docker build --build-arg REPO_ID=$model_repo_id --build-arg REVISION=$revision -t $repository:$version
