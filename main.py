@@ -86,13 +86,15 @@ class Model:
         # Configuration setup for the backend and model
         self.backend_config = BackendConfig()
         self.model = self.backend_config.model.source
-        self.engine_args = AsyncEngineArgs(engine_use_ray=True,
-                                           model=self.model,
-                                           trust_remote_code=False,
-                                           quantization=os.environ["QUANTIZATION"] or None,
-                                           max_context_len_to_capture=self.backend_config.max_context_length,
-                                           worker_use_ray=True,
-                                           tensor_parallel_size=int(os.environ["TENSOR_PARALLEL_SIZE"]) or 1)
+        self.engine_args = AsyncEngineArgs(
+            engine_use_ray=True,
+            model=self.model,
+            trust_remote_code=False,
+            quantization=os.environ["QUANTIZATION"] or None,
+            max_context_len_to_capture=self.backend_config.max_context_length,
+            worker_use_ray=True,
+            tensor_parallel_size=int(os.environ["TENSOR_PARALLEL_SIZE"]) or 1,
+        )
         self.engine = AsyncLLMEngine.from_engine_args(self.engine_args)
 
     async def iterate_outputs(self):
@@ -111,7 +113,8 @@ class Model:
                     if request_output.finished:
                         # Signal that the "generate" function can stop waiting for additional inputs
                         logging.info(
-                            f"Generated {num_tokens_by_id[request_id]} tokens in {time.time() - t0_by_id[request_id]:.2f}s")
+                            f"Generated {num_tokens_by_id[request_id]} tokens in {time.time() - t0_by_id[request_id]:.2f}s"
+                        )
                         self.done_by_id[request_id] = True
                     else:
                         # Initialize dictionary entries
@@ -124,32 +127,41 @@ class Model:
                         if num_tokens_by_id.get(request_id) is None:
                             num_tokens_by_id[request_id] = 0
 
-                    if request_output.outputs[0].text and "\ufffd" == request_output.outputs[0].text[-1]:
+                    if (
+                        request_output.outputs[0].text
+                        and "\ufffd" == request_output.outputs[0].text[-1]
+                    ):
                         continue
 
                     # Update tracking information
-                    text_delta = request_output.outputs[0].text[index_by_id[request_id]:]
+                    text_delta = request_output.outputs[0].text[
+                        index_by_id[request_id] :
+                    ]
                     index_by_id[request_id] = len(request_output.outputs[0].text)
-                    num_tokens_by_id[request_id] = len(request_output.outputs[0].token_ids)
+                    num_tokens_by_id[request_id] = len(
+                        request_output.outputs[0].token_ids
+                    )
 
                     # Add the result to the queue for this request
                     self.delta_queue_by_id[request_id].put(text_delta)
             time.sleep(0)
 
-    async def create_response(self, request_id: str, prompt: str, config: GenerationConfig):
+    async def create_response(
+        self, request_id: str, prompt: str, config: GenerationConfig
+    ):
         """Initiate a response generation for the given prompt and configuration, adding the result to the iterator
         pool."""
 
-        sampling_params = SamplingParams(temperature=config.temperature,
-                                         # Clamp top_p value to prevent float errors
-                                         top_p=clamp(config.top_p,
-                                                     0.0 + sys.float_info.epsilon, 1.0),
-                                         # Restrict top_k to valid values, -1 disables top_k
-                                         top_k=config.top_k if config.top_k >= 1 else -1,
-                                         stop=self.backend_config.stop_tokens,
-                                         max_tokens=config.max_new_tokens,
-                                         skip_special_tokens=False
-                                         )
+        sampling_params = SamplingParams(
+            temperature=config.temperature,
+            # Clamp top_p value to prevent float errors
+            top_p=clamp(config.top_p, 0.0 + sys.float_info.epsilon, 1.0),
+            # Restrict top_k to valid values, -1 disables top_k
+            top_k=config.top_k if config.top_k >= 1 else -1,
+            stop=self.backend_config.stop_tokens,
+            max_tokens=config.max_new_tokens,
+            skip_special_tokens=False,
+        )
         logging.debug(sampling_params)
         logging.info(f"Begin generation for request {request_id}")
         # Generate texts from the prompts. The output is a list of RequestOutput objects
@@ -158,7 +170,9 @@ class Model:
         logging.info(f"Begin iteration for request {request_id}")
         self.random_iterator.add_iterator(gen_iter)
 
-    async def generate_session(self, session: str, prompt: str, config: GenerationConfig):
+    async def generate_session(
+        self, session: str, prompt: str, config: GenerationConfig
+    ):
         """Manage a session's lifecycle for generating output, including setting up necessary state and iterators."""
 
         if self.delta_queue_by_id.get(session) is None:
@@ -173,7 +187,7 @@ class Model:
         return cur_request_queue is None or cur_request_queue.empty()
 
     def generate(
-            self, prompt: str, config: GenerationConfig
+        self, prompt: str, config: GenerationConfig
     ) -> Generator[str, Any, Any]:
         """Initiate and manage the generation process for a given prompt, yielding generated text segments."""
 
@@ -181,12 +195,17 @@ class Model:
         self.done_by_id[request_id] = False
 
         # Spawns a thread to request a response for the prompt
-        _thread = threading.Thread(target=asyncio.run, args=(self.generate_session(request_id, prompt, config),))
+        _thread = threading.Thread(
+            target=asyncio.run,
+            args=(self.generate_session(request_id, prompt, config),),
+        )
         _thread.start()
 
         logging.info(f"Begin reading the output for request {request_id}")
 
-        while not self.done_by_id.get(request_id) or not self.is_queue_empty(request_id):
+        while not self.done_by_id.get(request_id) or not self.is_queue_empty(
+            request_id
+        ):
             result = ""
             if not self.is_queue_empty(request_id):
                 result = self.delta_queue_by_id.get(request_id).get()

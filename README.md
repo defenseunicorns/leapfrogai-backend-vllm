@@ -87,3 +87,43 @@ Zarf package creation:
 zarf package create --set IMAGE_REPOSITORY=ghcr.io/defenseunicorns/leapfrogai/vllm --set IMAGE_VERSION=<IMAGE_TAG> --set NAME=vllm --insecure
 zarf package publish zarf-package-vllm-amd64-<IMAGE_TAG>.tar.zst oci://ghcr.io/defenseunicorns/packages/leapfrogai
 ```
+
+### Changing Model Name
+
+To change the name of the model's Zarf package and Docker image being produced for installation into a cluster and exposure to the end user, do the following:
+
+```bash
+# Create the Docker image
+# ASSUMPTION: localized registry is up and running, 
+#   see Docker documentation for more details
+export model_name="synthia-7b-awq" # name of the final package and image (no longer than 63 characters)
+export version="0.0.1" # desired image and package version
+export model_repo_id=""
+export model_revision=""
+export repository=localhost:5000/defenseunicorns/leapfrogai/$model_name
+
+docker build --build-arg REPO_ID=$model_repo_id --build-arg REVISION=$revision -t $repository:$version
+
+# Create Zarf package
+# See Zarf documentation for more details
+zarf package create \
+    --set image_version=$version \
+    --set name=$model_name \
+    --set image_repository=$repository \
+    --confirm
+
+# Deploy the target Zarf package 
+#   Change the resource limits as required by the model size
+zarf package deploy \
+    --set name=$model_name \
+    --set image_repository=$repository\
+    --set image_version=$version \
+    --set GPU_ENABLED=true \
+    --set LIMITS_GPU=1 \
+    --set REQUESTS_GPU=1 \
+    --set LIMITS_CPU=4 \
+    --set REQUESTS_CPU=6 \
+    --set LIMITS_MEMORY="100Gi" \
+    --set REQUESTS_MEMORY="50Gi" \
+    zarf-*.tar.zst && \
+```
