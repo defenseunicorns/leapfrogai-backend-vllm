@@ -102,7 +102,8 @@ export model_repo_id="TheBloke/Synthia-7B-v2.0-AWQ"
 export model_revision="main"
 export repository=localhost:5000/defenseunicorns/leapfrogai/$model_name
 
-docker build --build-arg REPO_ID=$model_repo_id --build-arg REVISION=$model_revision -t $repository:$version .
+# build and push to local registry in 1-shot
+docker build --push --build-arg REPO_ID=$model_repo_id --build-arg REVISION=$model_revision -t $repository:$version .
 
 # Create Zarf package
 # See Zarf documentation for more details
