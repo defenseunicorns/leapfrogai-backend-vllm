@@ -123,5 +123,8 @@ zarf package deploy \
     --set REQUESTS_CPU=4 \
     --set LIMITS_MEMORY="25Gi" \
     --set REQUESTS_MEMORY="10Gi" \
-    zarf-package-synthia-7b-awq-amd64-0.0.1.tar.zst
+    --set TENSOR_PARALLEL_SIZE=2 \ # this must be divisible to the number of attention heads in the model
+    --set QUANTIZATION="awq" \
+    zarf-package-synthia-7b-awq-amd64-0.0.1.tar.zst \
+    --confirm
 ```
