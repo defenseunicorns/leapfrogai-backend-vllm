@@ -41,7 +41,7 @@ ARG REVISION=main
 ENV HF_HOME=/home/leapfrogai/.cache/huggingface
 COPY scripts/model_download.py scripts/model_download.py
 
-RUN REPO_ID=${REPO_ID} FILENAME=${FILENAME} REVISION=${REVISION} python3 scripts/model_download.py
+RUN REPO_ID=${REPO_ID} REVISION=${REVISION} python3 scripts/model_download.py
 
 ENV QUANTIZATION=awq
 

@@ -22,7 +22,7 @@ The following are additional assumptions for GPU inferencing:
 
 ### Model Selection
 
-The default model that comes with this backend in this repository's officially released images is a [4-bit quantization of the Synthia-7b model](https://huggingface.co/TheBloke/SynthIA-7B-v2.0-AWQ).
+The default model that comes with this backend in this repository's officially released images is an [AWQ quantization of the Synthia-7b model](https://huggingface.co/TheBloke/SynthIA-7B-v2.0-AWQ).
 
 Other models can be loaded into this backend by modifying or supplying the [model_download.py](./scripts/model_download.py) arguments during image creation or Makefile command execution. The arguments must point to a single quantized model file, else you will need to use the [autoawq](https://docs.vllm.ai/en/latest/quantization/auto_awq.html) converter on an un-quantized model. Please see the Dockerfile or Makefile for further details.
 
@@ -73,6 +73,7 @@ Where `<IMAGE_TAG>` is the released packages found [here](https://github.com/org
 
 ```bash
 docker build -t ghcr.io/defenseunicorns/leapfrogai/vllm:<IMAGE_TAG> .
+# device=0 means it will use the first slotted GPU
 docker run --gpus device=0 -e GPU_ENABLED=true -p 50051:50051 -d --name vllm ghcr.io/defenseunicorns/leapfrogai/vllm:<IMAGE_TAG>
 ```
 
@@ -85,4 +86,45 @@ Zarf package creation:
 ```bash
 zarf package create --set IMAGE_REPOSITORY=ghcr.io/defenseunicorns/leapfrogai/vllm --set IMAGE_VERSION=<IMAGE_TAG> --set NAME=vllm --insecure
 zarf package publish zarf-package-vllm-amd64-<IMAGE_TAG>.tar.zst oci://ghcr.io/defenseunicorns/packages/leapfrogai
+```
+
+### Package Naming for Production Deployment
+
+To change the name of the model's Zarf package and Docker image being produced for installation into a cluster and exposure to the end user, do the following:
+
+```bash
+# Create the Docker image
+# ASSUMPTION: localized registry is up and running, 
+#   see Docker documentation for more details
+export model_name="synthia-7b-awq" # name of the final package and image (no longer than 63 characters)
+export version="0.0.1" # desired image and package version
+export model_repo_id="TheBloke/Synthia-7B-v2.0-AWQ"
+export model_revision="main"
+export repository=localhost:5000/defenseunicorns/leapfrogai/$model_name
+
+# build and push to local registry in 1-shot
+docker build --push --build-arg REPO_ID=$model_repo_id --build-arg REVISION=$model_revision -t $repository:$version .
+
+# Create Zarf package
+# See Zarf documentation for more details
+zarf package create \
+    --set image_version=$version \
+    --set name=$model_name \
+    --set image_repository=$repository \
+    --confirm
+
+# Deploy the target Zarf package 
+#   Change the resource limits as required by the model size
+zarf package deploy \
+    --set GPU_ENABLED=true \
+    --set LIMITS_GPU=1 \
+    --set REQUESTS_GPU=1 \
+    --set LIMITS_CPU=4 \
+    --set REQUESTS_CPU=4 \
+    --set LIMITS_MEMORY="25Gi" \
+    --set REQUESTS_MEMORY="10Gi" \
+    --set TENSOR_PARALLEL_SIZE=2 \ # this must be divisible to the number of attention heads in the model
+    --set QUANTIZATION="awq" \
+    zarf-package-synthia-7b-awq-amd64-0.0.1.tar.zst \
+    --confirm
 ```

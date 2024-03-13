@@ -1,5 +1,5 @@
 .venv/
-Synthia-7B-v1.3
+*.zst
 .vscode/
 config.yaml
 .model
