@@ -39,12 +39,15 @@ make create-venv
 source .venv/bin/activate
 make requirements-dev
 
+# Copy the environment variable file, change this if different params are needed
+cp .env.example .env
+
+# Make sure environment variables are set
+source .env
+
 # Clone Model
 # Supply a REPO_ID, FILENAME and REVISION if a different model is desired
 make fetch-model
-
-# Copy the environment variable file, change this if different params are needed
-cp .env.example .env
 
 # Copy the config file, change this if different params are needed
 cp config.example.yaml config.yaml
