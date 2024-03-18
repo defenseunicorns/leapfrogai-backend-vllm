@@ -6,6 +6,8 @@ REVISION = os.environ.get("REVISION", "main")
 
 os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 
+print(f"Downloading model from {REPO_ID} at revision {REVISION}...")
+
 snapshot_download(
     repo_id=REPO_ID,
     local_dir=".model",

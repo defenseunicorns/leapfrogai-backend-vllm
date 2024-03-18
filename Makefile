@@ -5,6 +5,8 @@ endif
 
 DEVICE ?= 0
 
+SHELL := /bin/bash
+
 .PHONY: all
 
 create-venv:
@@ -29,12 +31,14 @@ build-requirements-dev:
 	uv pip compile pyproject.toml -o requirements-dev.txt --override overrides.txt --extra dev --generate-hashes
 
 fetch-model:
+	source .env
 	python scripts/model_download.py
 
 test:
 	pytest **/*.py
 
 dev:
+	source ./.env
 	leapfrogai --app-dir=. main:Model
 
 lint:
