@@ -2,7 +2,7 @@
 Synthia-7B-v1.3
 .vscode/
 config.yaml
-.model
+.model*
 .env
 .python-version
 __pycache__
