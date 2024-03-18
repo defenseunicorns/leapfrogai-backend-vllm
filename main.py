@@ -91,7 +91,12 @@ class Model:
                                            trust_remote_code=False,
                                            quantization=os.environ["QUANTIZATION"] or None,
                                            max_context_len_to_capture=self.backend_config.max_context_length,
-                                           worker_use_ray=True)
+                                           max_model_len=self.backend_config.max_context_length,
+                                           dtype="auto",
+                                           worker_use_ray=True,
+                                           gpu_memory_utilization=.90
+                                           )
+        print(self.engine_args)
         self.engine = AsyncLLMEngine.from_engine_args(self.engine_args)
 
     async def iterate_outputs(self):

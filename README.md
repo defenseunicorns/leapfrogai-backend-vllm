@@ -22,9 +22,7 @@ The following are additional assumptions for GPU inferencing:
 
 ### Model Selection
 
-The default model that comes with this backend in this repository's officially released images is a [4-bit quantization of the Synthia-7b model](https://huggingface.co/TheBloke/SynthIA-7B-v2.0-AWQ).
-
-Other models can be loaded into this backend by modifying or supplying the [model_download.py](./scripts/model_download.py) arguments during image creation or Makefile command execution. The arguments must point to a single quantized model file, else you will need to use the [autoawq](https://docs.vllm.ai/en/latest/quantization/auto_awq.html) converter on an un-quantized model. Please see the Dockerfile or Makefile for further details.
+The default model that comes with this backend in this repository's officially released images is a [4-bit quantization of the Synthia-7b model](https://huggingface.co/TheBloke/SynthIA-7B-v2.0-GPQT).
 
 ### Run Locally
 
@@ -39,12 +37,15 @@ make create-venv
 source .venv/bin/activate
 make requirements-dev
 
+# Copy the environment variable file, change this if different params are needed
+cp .env.example .env
+
+# Make sure environment variables are set
+source .env
+
 # Clone Model
 # Supply a REPO_ID, FILENAME and REVISION if a different model is desired
 make fetch-model
-
-# Copy the environment variable file, change this if different params are needed
-cp .env.example .env
 
 # Copy the config file, change this if different params are needed
 cp config.example.yaml config.yaml
