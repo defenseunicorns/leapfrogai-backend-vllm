@@ -36,14 +36,14 @@ RUN uv pip install -r requirements.txt --override overrides.txt
 RUN uv pip install -U huggingface_hub[cli,hf_transfer]
 
 # download model
-ARG REPO_ID=TheBloke/Synthia-7B-v2.0-AWQ
-ARG REVISION=main
+ARG REPO_ID=TheBloke/Synthia-7B-v2.0-GPTQ
+ARG REVISION=gptq-4bit-32g-actorder_True
 ENV HF_HOME=/home/leapfrogai/.cache/huggingface
 COPY scripts/model_download.py scripts/model_download.py
 
 RUN REPO_ID=${REPO_ID} FILENAME=${FILENAME} REVISION=${REVISION} python3 scripts/model_download.py
 
-ENV QUANTIZATION=awq
+ENV QUANTIZATION=gptq
 
 COPY main.py .
 COPY config.yaml .

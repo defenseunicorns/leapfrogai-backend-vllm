@@ -1,8 +1,8 @@
 from huggingface_hub import snapshot_download
 import os
 
-REPO_ID = os.environ.get("REPO_ID", "TheBloke/Synthia-7B-v2.0-AWQ")
-REVISION = os.environ.get("REVISION", "main")
+REPO_ID = os.getenv('REPO_ID', "TheBloke/Synthia-7B-v2.0-GPTQ")
+REVISION = os.getenv("REVISION", "main")
 
 os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = "1"
 
