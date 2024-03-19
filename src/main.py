@@ -90,7 +90,7 @@ class Model:
         self.engine_args = AsyncEngineArgs(engine_use_ray=True,
                                            model=self.model,
                                            trust_remote_code=False,
-                                           quantization=AppConfig().options.quantization,
+                                           quantization=AppConfig().backend_options.quantization,
                                            max_context_len_to_capture=self.backend_config.max_context_length,
                                            max_model_len=self.backend_config.max_context_length,
                                            dtype="auto",

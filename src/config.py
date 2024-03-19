@@ -23,5 +23,5 @@ class ConfigOptions(BaseConfig):
 
 
 class AppConfig(BaseConfig):
-    options: ConfigOptions
+    backend_options: ConfigOptions
     CONFIG_SOURCES = FileSource(file='config.yaml')
