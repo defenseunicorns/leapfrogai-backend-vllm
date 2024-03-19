@@ -1,0 +1,6 @@
+.github
+.model
+.pytest_cache
+.venv
+zarf-package-*
+config.yaml

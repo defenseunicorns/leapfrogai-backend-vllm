@@ -29,25 +29,19 @@ build-requirements-dev:
 	uv pip compile pyproject.toml -o requirements-dev.txt --override overrides.txt --extra dev --generate-hashes
 
 fetch-model:
-	python3 scripts/model_download.py
+	python3 src/model_download.py
 
 test:
 	pytest **/*.py
 
 dev:
-	leapfrogai --app-dir=. main:Model
+	leapfrogai --app-dir=src/ main:Model
 
 lint:
 	ruff check . --fix
 	ruff format .
 
 docker-build:
-	if [ -f .env ]; then \
-		echo "env file exists"; \
-	else \
-		echo "env file does not exist, using .env.example."; \
-		cp .env.example .env; \
-	fi
 	if [ -f config.yaml ]; then \
 		echo "config file exists"; \
 	else \
@@ -57,12 +51,6 @@ docker-build:
 	docker build -t ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION} .
 
 docker-build-local-registry:
-	if [ -f .env ]; then \
-		echo "env file exists"; \
-	else \
-		echo "env file does not exist, using .env.example."; \
-		cp .env.example .env; \
-	fi
 	if [ -f config.yaml ]; then \
 		echo "config file exists"; \
 	else \

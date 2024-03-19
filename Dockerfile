@@ -39,14 +39,13 @@ RUN uv pip install -U huggingface_hub[cli,hf_transfer]
 ARG REPO_ID=TheBloke/Synthia-7B-v2.0-GPTQ
 ARG REVISION=gptq-4bit-32g-actorder_True
 ENV HF_HOME=/home/leapfrogai/.cache/huggingface
-COPY scripts/model_download.py scripts/model_download.py
+COPY . .
+RUN mv config.example.yaml config.yaml
 
-RUN REPO_ID=${REPO_ID} FILENAME=${FILENAME} REVISION=${REVISION} python3 scripts/model_download.py
+RUN REPO_ID=${REPO_ID} REVISION=${REVISION} python3 src/model_download.py
 
 ENV QUANTIZATION=gptq
 
-COPY main.py .
-COPY config.yaml .
 
 EXPOSE 50051:50051
 

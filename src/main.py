@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import os
 import queue
 import random
 import sys
@@ -16,6 +15,8 @@ from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.engine.async_llm_engine import AsyncLLMEngine
 from vllm.outputs import RequestOutput
 from vllm.utils import random_uuid
+
+from config import AppConfig
 
 load_dotenv()
 
@@ -89,7 +90,7 @@ class Model:
         self.engine_args = AsyncEngineArgs(engine_use_ray=True,
                                            model=self.model,
                                            trust_remote_code=False,
-                                           quantization=os.environ["QUANTIZATION"] or None,
+                                           quantization=AppConfig().options.quantization,
                                            max_context_len_to_capture=self.backend_config.max_context_length,
                                            max_model_len=self.backend_config.max_context_length,
                                            dtype="auto",

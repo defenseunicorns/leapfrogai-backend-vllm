@@ -1,3 +1,4 @@
+# SDK Variables
 model:
   source: ".model/"
 max_context_length: 32768
@@ -11,3 +12,13 @@ prompt_format:
     system: "SYSTEM: {}\n"
     assistant: "ASSISTANT: {}\n"
     user: "USER: {}\n"
+defaults:
+  top_p: 1.0
+  top_k: 0
+
+# Application Variables
+options:
+  hf_hub_enable_hf_transfer: "1"
+  repo_id: "TheBloke/Synthia-7B-v2.0-GPTQ"
+  revision: "gptq-4bit-32g-actorder_True"
+  quantization: "gptq"
