@@ -1,6 +1,10 @@
-ARG ARCH=amd64
-
 FROM nvidia/cuda:12.2.2-devel-ubuntu22.04 as builder
+
+# Set the config file defaults
+ARG HF_HUB_ENABLE_HF_TRANSFER="1"
+ARG REPO_ID="TheBloke/Synthia-7B-v2.0-GPTQ"
+ARG REVISION="gptq-4bit-32g-actorder_True"
+ARG QUANTIZATION="gptq"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -38,12 +42,14 @@ RUN uv pip install -U huggingface_hub[cli,hf_transfer]
 # download model
 ENV HF_HOME=/home/leapfrogai/.cache/huggingface
 COPY . .
-RUN mv config.example.yaml config.yaml
+
+# Load ARG values into env variables for pickup by confz
+ENV LAI_HF_HUB_ENABLE_HF_TRANSFER=${HF_HUB_ENABLE_HF_TRANSFER}
+ENV LAI_REPO_ID=${REPO_ID}
+ENV LAI_REVISION=${REVISION}
+ENV LAI_QUANTIZATION=${QUANTIZATION}
 
 RUN python3 src/model_download.py
-
-ENV QUANTIZATION=gptq
-
 
 EXPOSE 50051:50051
 

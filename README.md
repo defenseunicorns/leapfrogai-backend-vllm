@@ -24,6 +24,13 @@ The following are additional assumptions for GPU inferencing:
 
 The default model that comes with this backend in this repository's officially released images is a [4-bit quantization of the Synthia-7b model](https://huggingface.co/TheBloke/SynthIA-7B-v2.0-GPQT).
 
+You can optionally specify different models or quantization types using the following Docker build arguments:
+
+- `--build-arg HF_HUB_ENABLE_HF_TRANSFER="1"`: Enable or disable HuggingFace Hub transfer (default: 1)
+- `--build-arg REPO_ID="TheBloke/Synthia-7B-v2.0-GPTQ"`: HuggingFace repository ID for the model
+- `--build-arg REVISION="gptq-4bit-32g-actorder_True"`: Revision or commit hash for the model
+- `--build-arg QUANTIZATION="gptq"`: Quantization type (e.g., gptq, aws, or empty for un-quantized)
+
 ### Run Locally
 
 ```bash

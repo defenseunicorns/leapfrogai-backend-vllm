@@ -35,6 +35,12 @@ test:
 	pytest **/*.py
 
 dev:
+	if [ -f config.yaml ]; then \
+		echo "config file exists"; \
+	else \
+		echo "config file does not exist, using config.example.yaml."; \
+		cp config.example.yaml config.yaml; \
+	fi
 	leapfrogai --app-dir=src/ main:Model
 
 lint:
@@ -42,22 +48,10 @@ lint:
 	ruff format .
 
 docker-build:
-	if [ -f config.yaml ]; then \
-		echo "config file exists"; \
-	else \
-		echo "config file does not exist, using config.example.yaml."; \
-		cp config.example.yaml config.yaml; \
-	fi
 	docker build -t ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION} .
 
 docker-build-local-registry:
-	if [ -f config.yaml ]; then \
-		echo "config file exists"; \
-	else \
-		echo "config file does not exist, using config.example.yaml."; \
-		cp config.example.yaml config.yaml; \
-	fi
-	docker build -t ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION} .
+	make docker-build
 	docker tag ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION} localhost:5000/defenseunicorns/leapfrogai/vllm:${VERSION}
 	docker push localhost:5000/defenseunicorns/leapfrogai/vllm:${VERSION}
 

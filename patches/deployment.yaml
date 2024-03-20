@@ -5,12 +5,8 @@ metadata:
 spec:
   template:
     spec:
-      volumes:
-      - name: config-volume
-        configMap:
-          name: vllm-backend-configmap
       containers:
-      - name: leapfrogai-model
-        volumeMounts:
-        - name: config-volume
-          mountPath: /leapfrogai/
+        - name: leapfrogai-model
+          envFrom:
+            - configMapRef:
+                name: vllm-backend-configmap

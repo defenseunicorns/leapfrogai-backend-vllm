@@ -1,6 +1,6 @@
 from typing import Literal
 
-from confz import BaseConfig, FileSource
+from confz import BaseConfig, FileSource, EnvSource
 from pydantic import Field
 
 
@@ -24,4 +24,15 @@ class ConfigOptions(BaseConfig):
 
 class AppConfig(BaseConfig):
     backend_options: ConfigOptions
-    CONFIG_SOURCES = FileSource(file='config.yaml')
+    CONFIG_SOURCES = [
+        FileSource(file='config.yaml',
+                   optional=True),
+        EnvSource(allow_all=True,
+                  prefix="LAI_",
+                  remap={
+                      "hf_hub_enable_hf_transfer": "backend_options.hf_hub_enable_hf_transfer",
+                      "repo_id": "backend_options.repo_id",
+                      "revision": "backend_options.revision",
+                      "quantization": "backend_options.quantization",
+                  })
+    ]
