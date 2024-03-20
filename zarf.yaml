@@ -17,3 +17,15 @@ components:
     import:
       name: model
       url: oci://ghcr.io/defenseunicorns/packages/leapfrogai/leapfrogai-model:0.4.2
+    manifests:
+      - name: vllm-configmap
+        namespace: leapfrogai
+        files:
+          - manifests/configmap.yaml
+    files:
+      - source: patches/deployment.yaml
+        target: patches/deployment.yaml
+    actions:
+      onDeploy:
+        onSuccess:
+          - cmd: kubectl patch deployment vllm-model-vllm --patch "$(cat patches/deployment.yaml)" -n leapfrogai

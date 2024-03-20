@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-model-vllm
+spec:
+  template:
+    spec:
+      volumes:
+      - name: config-volume
+        configMap:
+          name: vllm-backend-configmap
+      containers:
+      - name: leapfrogai-model
+        volumeMounts:
+        - name: config-volume
+          mountPath: /leapfrogai/

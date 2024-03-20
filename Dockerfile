@@ -36,17 +36,15 @@ RUN uv pip install -r requirements.txt --override overrides.txt
 RUN uv pip install -U huggingface_hub[cli,hf_transfer]
 
 # download model
-ARG REPO_ID=TheBloke/Synthia-7B-v2.0-GPTQ
-ARG REVISION=gptq-4bit-32g-actorder_True
 ENV HF_HOME=/home/leapfrogai/.cache/huggingface
 COPY . .
 RUN mv config.example.yaml config.yaml
 
-RUN REPO_ID=${REPO_ID} REVISION=${REVISION} python3 src/model_download.py
+RUN python3 src/model_download.py
 
 ENV QUANTIZATION=gptq
 
 
 EXPOSE 50051:50051
 
-ENTRYPOINT ["leapfrogai", "--app-dir=.", "main:Model"]
+ENTRYPOINT ["leapfrogai", "--app-dir=src/", "main:Model"]
