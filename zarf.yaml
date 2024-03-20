@@ -1,15 +1,25 @@
 kind: ZarfPackageConfig
+
 metadata:
   name: "###ZARF_PKG_TMPL_NAME###"
   version: "###ZARF_PKG_TMPL_IMAGE_VERSION###"
-  description: >
-    VLLM model
+
+description: >
+  VLLM model
 
 constants:
   - name: IMAGE_VERSION
     value: "###ZARF_PKG_TMPL_IMAGE_VERSION###"
   - name: NAME
     value: "###ZARF_PKG_TMPL_NAME###"
+
+variables:
+  - name: MAX_CONTEXT_LENGTH
+    default: "32768"
+  - name: DEFAULTS_TOP_P
+    default: "1.0"
+  - name: DEFAULTS_TOP_K
+    default: "0"
 
 components:
   - name: import-model
