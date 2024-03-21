@@ -1,7 +1,7 @@
 .venv/
 Synthia-7B-v1.3
 .vscode/
-config.yaml
+configs/config.yaml
 .model*
 .env
 .python-version

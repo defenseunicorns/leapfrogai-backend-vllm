@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import queue
 import random
 import sys
@@ -7,6 +8,7 @@ import threading
 import time
 from typing import Any, Generator, Dict
 
+from confz import FileSource
 from dotenv import load_dotenv
 from leapfrogai import BackendConfig
 from leapfrogai.llm import GenerationConfig, LLM
@@ -85,6 +87,9 @@ class Model:
         _thread.start()
 
         # Configuration setup for the backend and model
+        BackendConfig.CONFIG_SOURCES = FileSource(
+            file=os.getenv("LEAPFROGAI_CONFIG_FILE", "configs/config.yaml"), optional=True
+        )
         self.backend_config = BackendConfig()
         self.model = self.backend_config.model.source
         self.engine_args = AsyncEngineArgs(engine_use_ray=True,

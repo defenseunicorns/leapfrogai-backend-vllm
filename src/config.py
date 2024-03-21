@@ -25,7 +25,7 @@ class ConfigOptions(BaseConfig):
 class AppConfig(BaseConfig):
     backend_options: ConfigOptions
     CONFIG_SOURCES = [
-        FileSource(file='config.yaml',
+        FileSource(file='configs/config.yaml',
                    optional=True),
         EnvSource(allow_all=True,
                   prefix="LAI_",
