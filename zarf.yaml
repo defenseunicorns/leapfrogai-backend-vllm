@@ -8,24 +8,6 @@ description: >
   VLLM model
 
 constants:
-  - name: REQUESTS_CPU
-    description: Number of CPU(s) to reserve for the pod
-    default: "0"
-  - name: REQUESTS_MEMORY
-    description: Amount of memory to reserve for the pod
-    default: "0"
-  - name: REQUESTS_GPU
-    description: Must be greater or equal to 1 if GPU_ENABLED is true
-    default: "0"
-  - name: LIMITS_CPU
-    description: Must be greater than or equal to REQUESTS_CPU
-    default: "0"
-  - name: LIMITS_MEMORY
-    description: Must be greater than or equal to REQUESTS_MEMORY
-    default: "0"
-  - name: LIMITS_GPU
-    description: Must be greater than or equal to REQUESTS_GPU
-    default: "0"
   - name: IMAGE_VERSION
     value: "###ZARF_PKG_TMPL_IMAGE_VERSION###"
   - name: ZARF_VERSION
@@ -37,22 +19,9 @@ constants:
   - name: IMAGE_REPOSITORY
     value: "###ZARF_PKG_TMPL_IMAGE_REPOSITORY###"
 
-variables:
-  - name: MAX_CONTEXT_LENGTH
-    default: "32768"
-  - name: DEFAULTS_TOP_P
-    default: "1.0"
-  - name: DEFAULTS_TOP_K
-    default: "0"
-
 components:
-  - name: leapfrogai-backend-vllm
+  - name: import-model
     required: true
-    charts:
-    - name: leapfrogai-backend-vllm
-      namespace: leapfrogai
-      localPath: chart
-      releaseName: "###ZARF_PKG_TMPL_NAME###-model"
-      version: "###ZARF_PKG_TMPL_CHART_VERSION###"
-    images:
-      - "###ZARF_PKG_TMPL_IMAGE_REPOSITORY###:###ZARF_PKG_TMPL_IMAGE_VERSION###"
+    import:
+      name: model
+      url: oci://ghcr.io/defenseunicorns/packages/leapfrogai/leapfrogai-model:0.4.2
