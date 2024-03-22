@@ -54,9 +54,6 @@ source .env
 # Supply a REPO_ID, FILENAME and REVISION if a different model is desired
 make fetch-model
 
-# Copy the config file, change this if different params are needed
-cp config.example.yaml config.yaml
-
 # Start Model Backend
 make dev
 ```
