@@ -35,11 +35,11 @@ test:
 	pytest **/*.py
 
 dev:
-	if [ -f config.yaml ]; then \
-		echo "config file exists"; \
+	if [ -f .env ]; then \
+		echo ".env file exists"; \
 	else \
-		echo "config file does not exist, using config.example.yaml."; \
-		cp config.example.yaml config.yaml; \
+		echo ".env file does not exist, using .env.example."; \
+		cp .env.example .env; \
 	fi
 	leapfrogai --app-dir=src/ main:Model
 

@@ -3,5 +3,4 @@
 .pytest_cache
 .venv
 zarf-package-*
-configs/config.yaml
-configs/config.example.yaml
+.env

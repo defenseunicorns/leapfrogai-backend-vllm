@@ -2,6 +2,8 @@ package:
   create:
     set:
       image_repository: "ghcr.io/defenseunicorns/leapfrogai/vllm"
-      image_version: 0.0.1
+      image_version: 0.1.0
+      zarf_version: 0.1.0
+      chart_version: 0.1.0
       name: vllm
     max_package_size: "1000000000"

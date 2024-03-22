@@ -6,9 +6,10 @@ import random
 import sys
 import threading
 import time
+import json
 from typing import Any, Generator, Dict
 
-from confz import FileSource
+from confz import FileSource, EnvSource
 from dotenv import load_dotenv
 from leapfrogai import BackendConfig
 from leapfrogai.llm import GenerationConfig, LLM
@@ -70,6 +71,44 @@ class RandomAsyncIterator:
             pass  # If the iterable is not found, ignore the error
 
 
+def get_backend_configs():
+    # Manually load env var as ConfZ does not handle complex types (list)
+    stop_tokens: str | None = os.getenv("LAI_STOP_TOKENS")
+    if stop_tokens:
+        processed_stop_tokens = json.loads(stop_tokens)
+    else:
+        processed_stop_tokens = []
+    del os.environ['LAI_STOP_TOKENS']
+
+    BackendConfig.CONFIG_SOURCES = EnvSource(
+        allow_all=True,
+        prefix="LAI_",
+        remap={
+            "model_source": "model.source",
+            "max_context_length": "max_context_length",
+            "stop_tokens": "stop_tokens",
+            "prompt_format_chat_system": "prompt_format.chat.system",
+            "prompt_format_chat_assistant": "prompt_format.chat.assistant",
+            "prompt_format_chat_user": "prompt_format.chat.user",
+            "prompt_format_defaults_top_p": "prompt_format.defaults.top_p",
+            "prompt_format_defaults_top_k": "prompt_format.defaults.top_k",
+        })
+    # Initialize an immutable config from env variables without stop_tokens list
+    backend_configs: BackendConfig = BackendConfig()
+
+    # Create a new config from env variables + stop_tokens
+    BackendConfig.CONFIG_SOURCES = None
+    backend_configs = BackendConfig(
+        name=backend_configs.name,
+        model=backend_configs.model,
+        max_context_length=backend_configs.max_context_length,
+        stop_tokens=processed_stop_tokens,
+        prompt_format=backend_configs.prompt_format,
+        default=backend_configs.defaults
+    )
+    return backend_configs
+
+
 @LLM
 class Model:
     """Implements an LLM model with concurrent output generation and management."""
@@ -86,11 +125,7 @@ class Model:
         _thread = threading.Thread(target=asyncio.run, args=(self.iterate_outputs(),))
         _thread.start()
 
-        # Configuration setup for the backend and model
-        BackendConfig.CONFIG_SOURCES = FileSource(
-            file=os.getenv("LEAPFROGAI_CONFIG_FILE", "configs/config.yaml"), optional=True
-        )
-        self.backend_config = BackendConfig()
+        self.backend_config = get_backend_configs()
         self.model = self.backend_config.model.source
         self.engine_args = AsyncEngineArgs(engine_use_ray=True,
                                            model=self.model,

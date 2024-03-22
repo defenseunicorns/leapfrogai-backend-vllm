@@ -2,9 +2,9 @@ import os
 from huggingface_hub import snapshot_download
 from config import AppConfig
 
-REPO_ID = AppConfig().backend_options.repo_id
-REVISION = AppConfig().backend_options.revision
-os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = AppConfig().backend_options.hf_hub_enable_hf_transfer
+REPO_ID = AppConfig().download_options.repo_id
+REVISION = AppConfig().download_options.revision
+os.environ["HF_HUB_ENABLE_HF_TRANSFER"] = AppConfig().download_options.hf_hub_enable_hf_transfer
 
 print(f"Downloading model from {REPO_ID} at revision {REVISION}...")
 

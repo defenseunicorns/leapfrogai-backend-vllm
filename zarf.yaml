@@ -2,16 +2,40 @@ kind: ZarfPackageConfig
 
 metadata:
   name: "###ZARF_PKG_TMPL_NAME###"
-  version: "###ZARF_PKG_TMPL_IMAGE_VERSION###"
+  version: "###ZARF_PKG_TMPL_ZARF_VERSION###"
 
 description: >
   VLLM model
 
 constants:
+  - name: REQUESTS_CPU
+    description: Number of CPU(s) to reserve for the pod
+    default: "0"
+  - name: REQUESTS_MEMORY
+    description: Amount of memory to reserve for the pod
+    default: "0"
+  - name: REQUESTS_GPU
+    description: Must be greater or equal to 1 if GPU_ENABLED is true
+    default: "0"
+  - name: LIMITS_CPU
+    description: Must be greater than or equal to REQUESTS_CPU
+    default: "0"
+  - name: LIMITS_MEMORY
+    description: Must be greater than or equal to REQUESTS_MEMORY
+    default: "0"
+  - name: LIMITS_GPU
+    description: Must be greater than or equal to REQUESTS_GPU
+    default: "0"
   - name: IMAGE_VERSION
     value: "###ZARF_PKG_TMPL_IMAGE_VERSION###"
+  - name: ZARF_VERSION
+    value: "###ZARF_PKG_TMPL_ZARF_VERSION###"
+  - name: CHART_VERSION
+    value: "###ZARF_PKG_TMPL_CHART_VERSION###"
   - name: NAME
     value: "###ZARF_PKG_TMPL_NAME###"
+  - name: IMAGE_REPOSITORY
+    value: "###ZARF_PKG_TMPL_IMAGE_REPOSITORY###"
 
 variables:
   - name: MAX_CONTEXT_LENGTH
@@ -22,20 +46,13 @@ variables:
     default: "0"
 
 components:
-  - name: import-model
+  - name: leapfrogai-backend-vllm
     required: true
-    import:
-      name: model
-      url: oci://ghcr.io/defenseunicorns/packages/leapfrogai/leapfrogai-model:0.4.2
-    manifests:
-      - name: vllm-configmap
-        namespace: leapfrogai
-        files:
-          - manifests/configmap.yaml
-    files:
-      - source: patches/deployment.yaml
-        target: patches/deployment.yaml
-    actions:
-      onDeploy:
-        onSuccess:
-          - cmd: kubectl patch deployment vllm-model-vllm --patch "$(cat patches/deployment.yaml)" -n leapfrogai
+    charts:
+    - name: leapfrogai-backend-vllm
+      namespace: leapfrogai
+      localPath: chart
+      releaseName: "###ZARF_PKG_TMPL_NAME###-model"
+      version: "###ZARF_PKG_TMPL_CHART_VERSION###"
+    images:
+      - "###ZARF_PKG_TMPL_IMAGE_REPOSITORY###:###ZARF_PKG_TMPL_IMAGE_VERSION###"

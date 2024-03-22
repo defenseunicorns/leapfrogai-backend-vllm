@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vllm-backend-configmap
+data:
+  MAX_CONTEXT_LENGTH: "###ZARF_VAR_MAX_CONTEXT_LENGTH###"
+  DEFAULTS_TOP_P: "###ZARF_VAR_DEFAULTS_TOP_P###"
+  DEFAULTS_TOP_K: "###ZARF_VAR_DEFAULTS_TOP_K###"

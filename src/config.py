@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 
 from confz import BaseConfig, FileSource, EnvSource
 from pydantic import Field
@@ -9,6 +9,9 @@ class ConfigOptions(BaseConfig):
         default=None,
         description="Type of quantization, for un-quantized models omit this field"
     )
+
+
+class DownloadOptions(BaseConfig):
     hf_hub_enable_hf_transfer: Literal["0", "1"] = Field(
         description="Option (0 - Disable, 1 - Enable) for faster transfers, tradeoff stability for faster speeds"
     )
@@ -24,15 +27,16 @@ class ConfigOptions(BaseConfig):
 
 class AppConfig(BaseConfig):
     backend_options: ConfigOptions
+    download_options: Optional[DownloadOptions]
     CONFIG_SOURCES = [
-        FileSource(file='configs/config.yaml',
+        FileSource(file='configs/config-app.yaml',
                    optional=True),
         EnvSource(allow_all=True,
                   prefix="LAI_",
                   remap={
-                      "hf_hub_enable_hf_transfer": "backend_options.hf_hub_enable_hf_transfer",
-                      "repo_id": "backend_options.repo_id",
-                      "revision": "backend_options.revision",
+                      "hf_hub_enable_hf_transfer": "download_options.hf_hub_enable_hf_transfer",
+                      "repo_id": "download_options.repo_id",
+                      "revision": "download_options.revision",
                       "quantization": "backend_options.quantization",
                   })
     ]
