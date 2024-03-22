@@ -29,8 +29,6 @@ class AppConfig(BaseConfig):
     backend_options: ConfigOptions
     download_options: Optional[DownloadOptions]
     CONFIG_SOURCES = [
-        FileSource(file='configs/config-app.yaml',
-                   optional=True),
         EnvSource(allow_all=True,
                   prefix="LAI_",
                   remap={
