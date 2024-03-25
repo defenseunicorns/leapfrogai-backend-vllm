@@ -12,8 +12,6 @@ constants:
     value: "###ZARF_PKG_TMPL_IMAGE_VERSION###"
   - name: ZARF_VERSION
     value: "###ZARF_PKG_TMPL_ZARF_VERSION###"
-  - name: CHART_VERSION
-    value: "###ZARF_PKG_TMPL_CHART_VERSION###"
   - name: NAME
     value: "###ZARF_PKG_TMPL_NAME###"
   - name: IMAGE_REPOSITORY
