@@ -1,6 +1,7 @@
 FROM nvidia/cuda:12.2.2-devel-ubuntu22.04 as builder
 
 # Set the config file defaults
+ARG PYTHON_VERSION=3.11.6
 ARG HF_HUB_ENABLE_HF_TRANSFER="1"
 ARG REPO_ID="TheBloke/Synthia-7B-v2.0-GPTQ"
 ARG REVISION="gptq-4bit-32g-actorder_True"
@@ -32,12 +33,17 @@ RUN apt-get -y update \
     && add-apt-repository ppa:deadsnakes/ppa
 RUN apt-get -y update
 
-# get deps for vllm compilation and model download
-RUN apt-get -y install python3.11-full git python3-venv
+# get deps for vllm compilation, model download, and pyenv
+RUN apt-get -y install git python3-venv make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev liblzma-dev
 
 RUN chown -R nonroot /home/leapfrogai/
 USER nonroot
 
+RUN git clone --depth=1 https://github.com/pyenv/pyenv.git .pyenv
+ENV PYENV_ROOT="/home/leapfrogai/.pyenv"
+ENV PATH="$PYENV_ROOT/shims:$PYENV_ROOT/bin:$PATH"
+RUN pyenv install ${PYTHON_VERSION}
+RUN pyenv global ${PYTHON_VERSION}
 RUN python3 -m venv .venv
 ENV PATH="/home/leapfrogai/.venv/bin:$PATH"
 # create virtual environment for light-weight portability and minimal libraries

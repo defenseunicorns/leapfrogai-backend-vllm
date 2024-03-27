@@ -135,7 +135,8 @@ class Model:
                                            max_model_len=self.backend_config.max_context_length,
                                            dtype="auto",
                                            worker_use_ray=True,
-                                           gpu_memory_utilization=.90
+                                           gpu_memory_utilization=.90,
+                                           tensor_parallel_size=1
                                            )
         print(self.engine_args)
         self.engine = AsyncLLMEngine.from_engine_args(self.engine_args)

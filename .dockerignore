@@ -1,5 +1,5 @@
 .github
-.model
+.model/*
 .pytest_cache
 .venv
 zarf-package-*

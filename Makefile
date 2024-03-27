@@ -68,7 +68,7 @@ zarf-create-local-registry:
 	zarf package create . --confirm --registry-override ghcr.io=localhost:5000 --set IMG=defenseunicorns/leapfrogai/vllm:${VERSION}
 
 zarf-deploy:
-	zarf package deploy --confirm zarf-package-*.tar.zst --set GPU_ENABLED=true --set REQUESTS_GPU=1 --set LIMITS_GPU=1 --set REQUESTS_CPU=0 --set LIMITS_CPU=0
+	zarf package deploy --confirm zarf-package-*.tar.zst --set GPU_ENABLED=true --set REQUESTS_GPU=1 --set LIMITS_GPU=1 --set REQUESTS_CPU=0 --set LIMITS_CPU=0 --set LIMITS_MEMORY=0 --set REQUEST_MEMORY=0
 
 zarf-publish:
 	zarf package publish zarf-*.tar.zst oci://ghcr.io/defenseunicorns/leapfrogai/packages/
