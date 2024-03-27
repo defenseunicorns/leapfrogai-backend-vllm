@@ -1,15 +1,21 @@
 kind: ZarfPackageConfig
+
 metadata:
   name: "###ZARF_PKG_TMPL_NAME###"
-  version: "###ZARF_PKG_TMPL_IMAGE_VERSION###"
-  description: >
-    VLLM model
+  version: "###ZARF_PKG_TMPL_ZARF_VERSION###"
+
+description: >
+  VLLM model
 
 constants:
   - name: IMAGE_VERSION
     value: "###ZARF_PKG_TMPL_IMAGE_VERSION###"
+  - name: ZARF_VERSION
+    value: "###ZARF_PKG_TMPL_ZARF_VERSION###"
   - name: NAME
     value: "###ZARF_PKG_TMPL_NAME###"
+  - name: IMAGE_REPOSITORY
+    value: "###ZARF_PKG_TMPL_IMAGE_REPOSITORY###"
 
 components:
   - name: import-model

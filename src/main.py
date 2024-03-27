@@ -6,8 +6,10 @@ import random
 import sys
 import threading
 import time
+import json
 from typing import Any, Generator, Dict
 
+from confz import FileSource, EnvSource
 from dotenv import load_dotenv
 from leapfrogai import BackendConfig
 from leapfrogai.llm import GenerationConfig, LLM
@@ -16,6 +18,8 @@ from vllm.engine.arg_utils import AsyncEngineArgs
 from vllm.engine.async_llm_engine import AsyncLLMEngine
 from vllm.outputs import RequestOutput
 from vllm.utils import random_uuid
+
+from config import AppConfig
 
 load_dotenv()
 
@@ -67,6 +71,44 @@ class RandomAsyncIterator:
             pass  # If the iterable is not found, ignore the error
 
 
+def get_backend_configs():
+    # Manually load env var as ConfZ does not handle complex types (list)
+    stop_tokens: str | None = os.getenv("LAI_STOP_TOKENS")
+    if stop_tokens:
+        processed_stop_tokens = json.loads(stop_tokens)
+    else:
+        processed_stop_tokens = []
+    del os.environ['LAI_STOP_TOKENS']
+
+    BackendConfig.CONFIG_SOURCES = EnvSource(
+        allow_all=True,
+        prefix="LAI_",
+        remap={
+            "model_source": "model.source",
+            "max_context_length": "max_context_length",
+            "stop_tokens": "stop_tokens",
+            "prompt_format_chat_system": "prompt_format.chat.system",
+            "prompt_format_chat_assistant": "prompt_format.chat.assistant",
+            "prompt_format_chat_user": "prompt_format.chat.user",
+            "prompt_format_defaults_top_p": "prompt_format.defaults.top_p",
+            "prompt_format_defaults_top_k": "prompt_format.defaults.top_k",
+        })
+    # Initialize an immutable config from env variables without stop_tokens list
+    backend_configs: BackendConfig = BackendConfig()
+
+    # Create a new config from env variables + stop_tokens
+    BackendConfig.CONFIG_SOURCES = None
+    backend_configs = BackendConfig(
+        name=backend_configs.name,
+        model=backend_configs.model,
+        max_context_length=backend_configs.max_context_length,
+        stop_tokens=processed_stop_tokens,
+        prompt_format=backend_configs.prompt_format,
+        default=backend_configs.defaults
+    )
+    return backend_configs
+
+
 @LLM
 class Model:
     """Implements an LLM model with concurrent output generation and management."""
@@ -83,18 +125,18 @@ class Model:
         _thread = threading.Thread(target=asyncio.run, args=(self.iterate_outputs(),))
         _thread.start()
 
-        # Configuration setup for the backend and model
-        self.backend_config = BackendConfig()
+        self.backend_config = get_backend_configs()
         self.model = self.backend_config.model.source
         self.engine_args = AsyncEngineArgs(engine_use_ray=True,
                                            model=self.model,
                                            trust_remote_code=False,
-                                           quantization=os.environ["QUANTIZATION"] or None,
+                                           quantization=AppConfig().backend_options.quantization,
                                            max_context_len_to_capture=self.backend_config.max_context_length,
                                            max_model_len=self.backend_config.max_context_length,
                                            dtype="auto",
                                            worker_use_ray=True,
-                                           gpu_memory_utilization=.90
+                                           gpu_memory_utilization=.90,
+                                           tensor_parallel_size=1
                                            )
         print(self.engine_args)
         self.engine = AsyncLLMEngine.from_engine_args(self.engine_args)

@@ -29,47 +29,29 @@ build-requirements-dev:
 	uv pip compile pyproject.toml -o requirements-dev.txt --override overrides.txt --extra dev --generate-hashes
 
 fetch-model:
-	python3 scripts/model_download.py
+	python3 src/model_download.py
 
 test:
 	pytest **/*.py
 
 dev:
-	leapfrogai --app-dir=. main:Model
+	if [ -f .env ]; then \
+		echo ".env file exists"; \
+	else \
+		echo ".env file does not exist, using .env.example."; \
+		cp .env.example .env; \
+	fi
+	leapfrogai --app-dir=src/ main:Model
 
 lint:
 	ruff check . --fix
 	ruff format .
 
 docker-build:
-	if [ -f .env ]; then \
-		echo "env file exists"; \
-	else \
-		echo "env file does not exist, using .env.example."; \
-		cp .env.example .env; \
-	fi
-	if [ -f config.yaml ]; then \
-		echo "config file exists"; \
-	else \
-		echo "config file does not exist, using config.example.yaml."; \
-		cp config.example.yaml config.yaml; \
-	fi
 	docker build -t ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION} .
 
 docker-build-local-registry:
-	if [ -f .env ]; then \
-		echo "env file exists"; \
-	else \
-		echo "env file does not exist, using .env.example."; \
-		cp .env.example .env; \
-	fi
-	if [ -f config.yaml ]; then \
-		echo "config file exists"; \
-	else \
-		echo "config file does not exist, using config.example.yaml."; \
-		cp config.example.yaml config.yaml; \
-	fi
-	docker build -t ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION} .
+	make docker-build
 	docker tag ghcr.io/defenseunicorns/leapfrogai/vllm:${VERSION} localhost:5000/defenseunicorns/leapfrogai/vllm:${VERSION}
 	docker push localhost:5000/defenseunicorns/leapfrogai/vllm:${VERSION}
 
@@ -86,7 +68,7 @@ zarf-create-local-registry:
 	zarf package create . --confirm --registry-override ghcr.io=localhost:5000 --set IMG=defenseunicorns/leapfrogai/vllm:${VERSION}
 
 zarf-deploy:
-	zarf package deploy --confirm zarf-package-*.tar.zst --set GPU_ENABLED=true --set REQUESTS_GPU=1 --set LIMITS_GPU=1 --set REQUESTS_CPU=0 --set LIMITS_CPU=0
+	zarf package deploy --confirm zarf-package-*.tar.zst --set GPU_ENABLED=true --set REQUESTS_GPU=1 --set LIMITS_GPU=1 --set REQUESTS_CPU=0 --set LIMITS_CPU=0 --set LIMITS_MEMORY=0 --set REQUEST_MEMORY=0
 
 zarf-publish:
 	zarf package publish zarf-*.tar.zst oci://ghcr.io/defenseunicorns/leapfrogai/packages/
