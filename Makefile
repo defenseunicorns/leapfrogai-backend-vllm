@@ -35,13 +35,7 @@ test:
 	pytest **/*.py
 
 dev:
-	if [ -f .env ]; then \
-		echo ".env file exists"; \
-	else \
-		echo ".env file does not exist, using .env.example."; \
-		cp .env.example .env; \
-	fi
-	leapfrogai --app-dir=src/ main:Model
+	python -u src/main.py
 
 lint:
 	ruff check . --fix

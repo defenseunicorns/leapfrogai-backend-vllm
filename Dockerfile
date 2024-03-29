@@ -75,4 +75,4 @@ RUN python3 src/model_download.py
 
 EXPOSE 50051:50051
 
-ENTRYPOINT ["leapfrogai", "--app-dir=src/", "main:Model"]
+ENTRYPOINT ["python", "-u", "src/main.py"]

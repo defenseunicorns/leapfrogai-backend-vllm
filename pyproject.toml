@@ -1,6 +1,6 @@
 [project]
 name = "leapfrogai-backend-vllm"
-version = "0.1.0"
+version = "0.2.5"
 description = "LeapfrogAI backend for VLLM"
 authors = [{ name = "LeapfrogAI Authors", email = "ai@defenseunicorns.com" }]
 license = { file = "LICENSE" }
