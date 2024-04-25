@@ -794,9 +794,9 @@ psutil==5.9.8 \
     --hash=sha256:d06016f7f8625a1825ba3732081d77c94589dca78b7a3fc072194851e88461a4 \
     --hash=sha256:d16bbddf0693323b8c6123dd804100241da461e41d6e332fb0ba6058f630f8c8
     # via vllm
-pydantic==2.0 \
-    --hash=sha256:6e313661b310eb5b2c45168ce05d8dd79f57563adaf3906162a917585576b846 \
-    --hash=sha256:8bf7355be5e1207c756dfbc8046236dadd4ce04101fb482e6c8834a06d9aa04f
+pydantic==2.4.0 \
+    --hash=sha256:54216ccb537a606579f53d7f6ed912e98fffce35aff93b25cd80b1c2ca806fc3 \
+    --hash=sha256:909b2b7d7be775a890631218e8c4b6b5418c9b6c57074ae153e5c09b73bf06a3
     # via
     #   confz
     #   fastapi
