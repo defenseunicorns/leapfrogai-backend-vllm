@@ -1,5 +1,7 @@
 # LeapfrogAI VLLM Backend
 
+> ***⚠️This repo is archived in favor of the LeapfrogAI monorepo: https://github.com/defenseunicorns/leapfrogai⚠️***
+
 ## Description
 
 A LeapfrogAI API-compatible [VLLM](https://github.com/vllm-project/vllm) wrapper for quantized and un-quantized model inferencing across GPU infrastructures.
