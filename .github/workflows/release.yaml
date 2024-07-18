@@ -41,7 +41,7 @@ jobs:
         uses: battila7/get-version-action@90eb8fc70f6dfcf3f9b95ed8f164d2c05038e729 # v2.2.1
 
       - name: Install Zarf
-        uses: defenseunicorns/setup-zarf@f95763914e20e493bb5d45d63e30e17138f981d6 # v1.0.0
+        uses: defenseunicorns/setup-zarf@10e539efed02f75ec39eb8823e22a5c795f492ae #v1.0.1
 
       - name: Build Zarf Package
         run: zarf package create . --set=PACKAGE_VERSION=${{ steps.get_version.outputs.version-without-v }} --set=IMAGE_VERSION=${{ steps.get_version.outputs.version-without-v }} --confirm
